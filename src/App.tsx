@@ -1,0 +1,42 @@
+//import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Container } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+
+import MyNavbar from "./components/MyNavbar";
+import Footer from "./components/Footer";
+
+import InteractiveBackground from "./components/InteractiveBackground";
+import Home from "./components/Home";
+import About from "./components/About";
+import Projects from "./components/Projects";
+//import Contact from "./pages/Contact";
+//import PageError from "./pages/PageError";
+
+function App() {
+  return (
+    <BrowserRouter>
+      <InteractiveBackground />
+      <MyNavbar />
+      <AppContent />
+      <Footer />
+    </BrowserRouter>
+  );
+}
+
+function AppContent() {
+  return (
+    <>
+      <Container className="my-4">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/projects" element={<Projects />} />
+        </Routes>
+      </Container>
+    </>
+  );
+}
+
+export default App;
