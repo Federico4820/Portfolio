@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import project1Img from "../assets/ProjectsImag/Portfolio.png";
-
+import Portfolio from "../assets/ProjectsImag/Portfolio.png";
+import EpimeteoImg from "../assets/ProjectsImag/epimeteo.png";
 interface Project {
   img: string;
   name: string;
@@ -11,14 +11,21 @@ interface Project {
 
 const projectsData: Project[] = [
   {
-    img: project1Img,
+    img: Portfolio,
     name: "Portfolio Web",
     description:
       "Sito portfolio sviluppato con React, SPA con routing e animazioni interattive.",
-    github: "https://github.com/username/project1",
+    github: "https://github.com/Federico4820/Portfolio",
     demo: "https://project1-demo.com",
   },
-  // soon altri progetti qui
+  {
+    img: EpimeteoImg,
+    name: "Portfolio Web",
+    description:
+      "Uno dei miei primi siti, che usa richieste API per ricavare informazioni meteo su 3 zone diverse",
+    github: "https://github.com/Federico4820/EpiMeteo-S10L5",
+    demo: "https://epi-meteo-s10-l5.vercel.app/",
+  },
 ];
 
 const Projects: React.FC = () => {

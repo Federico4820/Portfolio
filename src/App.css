@@ -327,10 +327,11 @@ h6 {
 /* PROJECTS */
 .projects-section {
   position: relative;
-  z-index: 1; /* importante per farlo sopra al background */
+  z-index: 1;
   padding: 80px 20px;
   color: #fff;
   text-align: center;
+  margin-bottom: 20vh;
 }
 
 .projects-section h2 {
