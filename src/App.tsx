@@ -12,7 +12,7 @@ import Home from "./components/Home";
 import About from "./components/About";
 import Projects from "./components/Projects";
 import Contact from "./components/Contact";
-//import PageError from "./pages/PageError";
+import PageError from "./components/PageError";
 
 function App() {
   return (
@@ -34,6 +34,7 @@ function AppContent() {
           <Route path="/about" element={<About />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="*" element={<PageError />} />
         </Routes>
       </Container>
     </>
