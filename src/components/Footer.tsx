@@ -1,5 +1,6 @@
 import { Container, Row, Col } from "react-bootstrap";
 import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Footer: React.FC = () => {
   return (
@@ -21,16 +22,16 @@ const Footer: React.FC = () => {
             <h5 className="footer-title">Link Rapidi</h5>
             <ul className="list-unstyled">
               <li>
-                <a href="/">Home</a>
+                <Link to="/">Home</Link>
               </li>
               <li>
-                <a href="/about">About</a>
+                <Link to="/about">About</Link>
               </li>
               <li>
-                <a href="/projects">Projects</a>
+                <Link to="/projects">Projects</Link>
               </li>
               <li>
-                <a href="/contact">Contact</a>
+                <Link to="/contact">Contact</Link>
               </li>
             </ul>
           </Col>
