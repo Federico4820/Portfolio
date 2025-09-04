@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import LogoSVG from "../assets/logo.svg";
+import LogoSVG from "../assets/circular_logo.svg";
 
 const MyNavbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
