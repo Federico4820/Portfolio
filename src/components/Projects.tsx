@@ -30,36 +30,88 @@ const projectsData: Project[] = [
 
 const Projects: React.FC = () => {
   useEffect(() => {
-    const cards = document.querySelectorAll<HTMLDivElement>(".project-card");
+    const cards = Array.from(
+      document.querySelectorAll<HTMLDivElement>(".project-card")
+    );
+    const cleanups: Array<() => void> = [];
 
     cards.forEach((card) => {
-      const handleMouseMove = (e: MouseEvent) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+      let requestId = 0;
+      let isActive = false;
 
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
+      const update = (clientX: number, clientY: number) => {
+        if (!isActive) return;
+        if (requestId) cancelAnimationFrame(requestId);
 
-        const rotateX = ((y - centerY) / centerY) * -10;
-        const rotateY = ((x - centerX) / centerX) * 10;
+        requestId = requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          const x = clientX - rect.left;
+          const y = clientY - rect.top;
+          const cx = rect.width / 2;
+          const cy = rect.height / 2;
 
-        card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+          const rotateX = ((y - cy) / cy) * -10; // inclinazione max 10°
+          const rotateY = ((x - cx) / cx) * 10;
+
+          card.style.transition = "none";
+          card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+        });
       };
 
-      const handleMouseLeave = () => {
-        card.style.transform =
-          "perspective(600px) rotateX(0) rotateY(0) scale(1)";
+      const reset = () => {
+        isActive = false;
+        card.classList.remove("active-touch");
+        if (requestId) {
+          cancelAnimationFrame(requestId);
+          requestId = 0;
+        }
+        setTimeout(() => {
+          card.style.transition = "transform 0.25s ease";
+          card.style.transform =
+            "perspective(600px) rotateX(0) rotateY(0) scale(1)";
+        }, 0);
       };
 
-      card.addEventListener("mousemove", handleMouseMove);
-      card.addEventListener("mouseleave", handleMouseLeave);
-
-      return () => {
-        card.removeEventListener("mousemove", handleMouseMove);
-        card.removeEventListener("mouseleave", handleMouseLeave);
+      // --- Pointer handlers ---
+      const onPointerDown = (e: PointerEvent) => {
+        isActive = true;
+        card.classList.add("active-touch");
+        if (card.setPointerCapture) card.setPointerCapture(e.pointerId);
+        update(e.clientX, e.clientY); // tilt immediato verso il punto toccato
       };
+
+      const onPointerMove = (e: PointerEvent) => {
+        if (isActive) update(e.clientX, e.clientY);
+      };
+
+      const onPointerUp = (e: PointerEvent) => {
+        if (card.releasePointerCapture) card.releasePointerCapture(e.pointerId);
+        reset();
+      };
+
+      const onPointerLeave = () => {
+        if (isActive) reset();
+      };
+
+      const onPointerCancel = reset;
+
+      card.addEventListener("pointerdown", onPointerDown);
+      card.addEventListener("pointermove", onPointerMove);
+      card.addEventListener("pointerup", onPointerUp);
+      card.addEventListener("pointerleave", onPointerLeave);
+      card.addEventListener("pointercancel", onPointerCancel);
+
+      cleanups.push(() => {
+        card.removeEventListener("pointerdown", onPointerDown);
+        card.removeEventListener("pointermove", onPointerMove);
+        card.removeEventListener("pointerup", onPointerUp);
+        card.removeEventListener("pointerleave", onPointerLeave);
+        card.removeEventListener("pointercancel", onPointerCancel);
+        if (requestId) cancelAnimationFrame(requestId);
+      });
     });
+
+    return () => cleanups.forEach((fn) => fn());
   }, []);
 
   return (

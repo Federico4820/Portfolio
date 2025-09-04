@@ -11,62 +11,101 @@ import tsLogo from "../assets/typescript.png";
 
 const About: React.FC = () => {
   useEffect(() => {
-    const cards = document.querySelectorAll<HTMLDivElement>(".tech-card");
+    const cards = Array.from(
+      document.querySelectorAll<HTMLDivElement>(".tech-card")
+    );
+    const cleanups: Array<() => void> = [];
 
     cards.forEach((card) => {
-      let requestId: number;
+      let requestId = 0;
+      let isActive = false;
 
-      const updateTransform = (clientX: number, clientY: number) => {
+      const update = (clientX: number, clientY: number) => {
+        if (!isActive) return;
         if (requestId) cancelAnimationFrame(requestId);
 
         requestId = requestAnimationFrame(() => {
           const rect = card.getBoundingClientRect();
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
+          const x = clientX - rect.left;
+          const y = clientY - rect.top;
+          const cx = rect.width / 2;
+          const cy = rect.height / 2;
 
-          const rotateX = ((clientY - rect.top - centerY) / centerY) * -15;
-          const rotateY = ((clientX - rect.left - centerX) / centerX) * 15;
+          const rotateX = ((y - cy) / cy) * -15;
+          const rotateY = ((x - cx) / cx) * 15;
 
-          card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.08)`;
           card.style.transition = "none";
+          card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.08)`;
         });
       };
 
-      const resetTransform = () => {
-        card.style.transition = "transform 0.3s ease";
-        card.style.transform =
-          "perspective(600px) rotateX(0) rotateY(0) scale(1)";
+      const reset = () => {
+        isActive = false;
+        if (requestId) {
+          cancelAnimationFrame(requestId);
+          requestId = 0;
+        }
+        setTimeout(() => {
+          card.style.transition = "transform 0.25s ease";
+          card.style.transform =
+            "perspective(600px) rotateX(0) rotateY(0) scale(1)";
+        }, 0);
       };
 
-      // Desktop
-      const handleMouseMove = (e: MouseEvent) =>
-        updateTransform(e.clientX, e.clientY);
-      card.addEventListener("mousemove", handleMouseMove);
-      card.addEventListener("mouseleave", resetTransform);
-
-      // Mobile / Touch
-      const handleTouch = (e: TouchEvent) => {
-        const touch = e.touches[0];
-        updateTransform(touch.clientX, touch.clientY);
+      // --- Pointer handlers ---
+      const onPointerDown = (e: PointerEvent) => {
+        if (e.pointerType === "touch" || e.pointerType === "pen") {
+          isActive = true;
+          if (card.setPointerCapture) {
+            card.setPointerCapture(e.pointerId);
+          }
+          update(e.clientX, e.clientY);
+        }
       };
-      card.addEventListener("touchstart", handleTouch);
-      card.addEventListener("touchmove", handleTouch);
-      card.addEventListener("touchend", resetTransform);
-      card.addEventListener("touchcancel", resetTransform);
 
-      // Cleanup
-      return () => {
-        card.removeEventListener("mousemove", handleMouseMove);
-        card.removeEventListener("mouseleave", resetTransform);
-
-        card.removeEventListener("touchstart", handleTouch);
-        card.removeEventListener("touchmove", handleTouch);
-        card.removeEventListener("touchend", resetTransform);
-        card.removeEventListener("touchcancel", resetTransform);
-
-        cancelAnimationFrame(requestId);
+      const onPointerMove = (e: PointerEvent) => {
+        if (e.pointerType === "mouse") {
+          // Desktop: sempre attivo in hover
+          isActive = true;
+          update(e.clientX, e.clientY);
+        } else {
+          // Mobile: attivo solo se c’è stato un down
+          if (isActive) update(e.clientX, e.clientY);
+        }
       };
+
+      const onPointerUp = (e: PointerEvent) => {
+        if (e.pointerType !== "mouse") {
+          if (card.releasePointerCapture) {
+            card.releasePointerCapture(e.pointerId);
+          }
+          reset();
+        }
+      };
+
+      const onPointerLeave = () => {
+        if (isActive) reset();
+      };
+
+      card.addEventListener("pointerdown", onPointerDown);
+      card.addEventListener("pointermove", onPointerMove);
+      card.addEventListener("pointerup", onPointerUp);
+      card.addEventListener("pointerleave", onPointerLeave);
+      card.addEventListener("pointercancel", reset);
+
+      cleanups.push(() => {
+        card.removeEventListener("pointerdown", onPointerDown);
+        card.removeEventListener("pointermove", onPointerMove);
+        card.removeEventListener("pointerup", onPointerUp);
+        card.removeEventListener("pointerleave", onPointerLeave);
+        card.removeEventListener("pointercancel", reset);
+        if (requestId) cancelAnimationFrame(requestId);
+      });
     });
+
+    return () => {
+      cleanups.forEach((fn) => fn());
+    };
   }, []);
 
   return (

@@ -236,13 +236,11 @@ h6 {
   font-family: "Quicksand", sans-serif;
   color: #ffffff;
 
-  /* Effetto traslucido */
-  background: rgba(0, 0, 0, 0.5); /* sfondo semi-trasparente */
-  backdrop-filter: blur(8px); /* sfocatura dello sfondo */
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 
-  /* Animazione comparsa da sinistra */
   opacity: 0;
   transform: translateX(-60px);
   animation: slideInLeft 1s ease forwards;
@@ -305,15 +303,21 @@ h6 {
 .tech-card {
   background: transparent;
   border-radius: 12px;
-  border: 10px;
-  transition: transform 0.15s ease-out, background-color 0.3s;
+  border: 2px solid rgba(255, 255, 255, 0.2);
   perspective: 1000px; /* per effetto 3D */
+  transition: transform 0.25s ease, background-color 0.25s ease,
+    box-shadow 0.25s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
 }
 
-.tech-card:hover {
+.tech-card:hover,
+.tech-card.active-touch {
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .tech-card img {
@@ -356,10 +360,21 @@ h6 {
   -webkit-backdrop-filter: blur(6px);
   border-radius: 12px;
   padding: 20px;
-  transition: transform 0.1s ease, background-color 0.3s;
+  transition: transform 0.25s ease, background-color 0.25s ease,
+    box-shadow 0.25s ease;
   cursor: pointer;
   position: relative;
-  z-index: 2; /* sopra il background */
+  z-index: 2;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.project-card:hover,
+.project-card.active-touch {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .project-card img {
