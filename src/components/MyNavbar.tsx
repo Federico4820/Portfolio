@@ -7,12 +7,21 @@ const MyNavbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+  const ignoreScrollRef = useRef(false);
 
+  // Gestione scroll: riduce navbar e chiude menu
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 1);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 1);
+
+      if (expanded && !ignoreScrollRef.current) {
+        setExpanded(false);
+      }
+    };
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [expanded]);
 
   // Chiudi il menu quando clicchi fuori
   useEffect(() => {
@@ -28,6 +37,17 @@ const MyNavbar: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [expanded]);
+
+  const handleToggle = () => {
+    setExpanded(!expanded);
+
+    if (!expanded) {
+      ignoreScrollRef.current = true;
+      setTimeout(() => {
+        ignoreScrollRef.current = false;
+      }, 500);
+    }
+  };
 
   return (
     <Navbar
@@ -50,7 +70,7 @@ const MyNavbar: React.FC = () => {
         </Navbar.Brand>
         <Navbar.Toggle
           aria-controls="responsive-navbar-nav"
-          onClick={() => setExpanded(!expanded)}
+          onClick={handleToggle}
         />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="ms-auto">
@@ -62,7 +82,7 @@ const MyNavbar: React.FC = () => {
                 className={({ isActive }) =>
                   isActive ? "nav-link active-link" : "nav-link"
                 }
-                onClick={() => setExpanded(false)}
+                onClick={() => setExpanded(false)} // chiude il menu al click sul link
               >
                 {["Home", "About", "Projects", "Contact"][idx]}
               </NavLink>

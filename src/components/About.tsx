@@ -16,38 +16,54 @@ const About: React.FC = () => {
     cards.forEach((card) => {
       let requestId: number;
 
-      const handleMouseMove = (e: MouseEvent) => {
+      const updateTransform = (clientX: number, clientY: number) => {
         if (requestId) cancelAnimationFrame(requestId);
 
         requestId = requestAnimationFrame(() => {
           const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
           const centerX = rect.width / 2;
           const centerY = rect.height / 2;
 
-          const rotateX = ((y - centerY) / centerY) * -15; // inclinazione max 15°
-          const rotateY = ((x - centerX) / centerX) * 15;
+          const rotateX = ((clientY - rect.top - centerY) / centerY) * -15;
+          const rotateY = ((clientX - rect.left - centerX) / centerX) * 15;
 
           card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.08)`;
-          card.style.transition = "none"; // nessun ritardo durante il movimento
+          card.style.transition = "none";
         });
       };
 
-      const handleMouseLeave = () => {
+      const resetTransform = () => {
         card.style.transition = "transform 0.3s ease";
         card.style.transform =
           "perspective(600px) rotateX(0) rotateY(0) scale(1)";
       };
 
+      // Desktop
+      const handleMouseMove = (e: MouseEvent) =>
+        updateTransform(e.clientX, e.clientY);
       card.addEventListener("mousemove", handleMouseMove);
-      card.addEventListener("mouseleave", handleMouseLeave);
+      card.addEventListener("mouseleave", resetTransform);
 
-      // cleanup
+      // Mobile / Touch
+      const handleTouch = (e: TouchEvent) => {
+        const touch = e.touches[0];
+        updateTransform(touch.clientX, touch.clientY);
+      };
+      card.addEventListener("touchstart", handleTouch);
+      card.addEventListener("touchmove", handleTouch);
+      card.addEventListener("touchend", resetTransform);
+      card.addEventListener("touchcancel", resetTransform);
+
+      // Cleanup
       return () => {
         card.removeEventListener("mousemove", handleMouseMove);
-        card.removeEventListener("mouseleave", handleMouseLeave);
+        card.removeEventListener("mouseleave", resetTransform);
+
+        card.removeEventListener("touchstart", handleTouch);
+        card.removeEventListener("touchmove", handleTouch);
+        card.removeEventListener("touchend", resetTransform);
+        card.removeEventListener("touchcancel", resetTransform);
+
         cancelAnimationFrame(requestId);
       };
     });
