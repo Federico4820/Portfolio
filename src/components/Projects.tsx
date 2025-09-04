@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Portfolio from "../assets/ProjectsImag/Portfolio.png";
+import Portfolio from "../assets/ProjectsImag/portfolio.png";
 import EpimeteoImg from "../assets/ProjectsImag/epimeteo.png";
 interface Project {
   img: string;
