@@ -16,7 +16,7 @@ const projectsData: Project[] = [
     description:
       "Sito portfolio sviluppato con React, SPA con routing e animazioni interattive.",
     github: "https://github.com/Federico4820/Portfolio",
-    demo: "https://project1-demo.com",
+    demo: "https://portfolio-nine-mu-fpu4rpmbtn.vercel.app",
   },
   {
     img: EpimeteoImg,
