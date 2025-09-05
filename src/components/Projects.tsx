@@ -50,17 +50,16 @@ const Projects: React.FC = () => {
           const cx = rect.width / 2;
           const cy = rect.height / 2;
 
-          const rotateX = ((y - cy) / cy) * -10; // inclinazione max 10°
-          const rotateY = ((x - cx) / cx) * 10;
+          const rotateX = ((y - cy) / cy) * -15;
+          const rotateY = ((x - cx) / cx) * 15;
 
           card.style.transition = "none";
-          card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+          card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.08)`;
         });
       };
 
       const reset = () => {
         isActive = false;
-        card.classList.remove("active-touch");
         if (requestId) {
           cancelAnimationFrame(requestId);
           requestId = 0;
@@ -74,44 +73,58 @@ const Projects: React.FC = () => {
 
       // --- Pointer handlers ---
       const onPointerDown = (e: PointerEvent) => {
-        isActive = true;
-        card.classList.add("active-touch");
-        if (card.setPointerCapture) card.setPointerCapture(e.pointerId);
-        update(e.clientX, e.clientY); // tilt immediato verso il punto toccato
+        if (e.pointerType === "touch" || e.pointerType === "pen") {
+          isActive = true;
+          if (card.setPointerCapture) {
+            card.setPointerCapture(e.pointerId);
+          }
+          update(e.clientX, e.clientY);
+        }
       };
 
       const onPointerMove = (e: PointerEvent) => {
-        if (isActive) update(e.clientX, e.clientY);
+        if (e.pointerType === "mouse") {
+          // Desktop: sempre attivo in hover
+          isActive = true;
+          update(e.clientX, e.clientY);
+        } else {
+          // Mobile: attivo solo se c’è stato un down
+          if (isActive) update(e.clientX, e.clientY);
+        }
       };
 
       const onPointerUp = (e: PointerEvent) => {
-        if (card.releasePointerCapture) card.releasePointerCapture(e.pointerId);
-        reset();
+        if (e.pointerType !== "mouse") {
+          if (card.releasePointerCapture) {
+            card.releasePointerCapture(e.pointerId);
+          }
+          reset();
+        }
       };
 
       const onPointerLeave = () => {
         if (isActive) reset();
       };
 
-      const onPointerCancel = reset;
-
       card.addEventListener("pointerdown", onPointerDown);
       card.addEventListener("pointermove", onPointerMove);
       card.addEventListener("pointerup", onPointerUp);
       card.addEventListener("pointerleave", onPointerLeave);
-      card.addEventListener("pointercancel", onPointerCancel);
+      card.addEventListener("pointercancel", reset);
 
       cleanups.push(() => {
         card.removeEventListener("pointerdown", onPointerDown);
         card.removeEventListener("pointermove", onPointerMove);
         card.removeEventListener("pointerup", onPointerUp);
         card.removeEventListener("pointerleave", onPointerLeave);
-        card.removeEventListener("pointercancel", onPointerCancel);
+        card.removeEventListener("pointercancel", reset);
         if (requestId) cancelAnimationFrame(requestId);
       });
     });
 
-    return () => cleanups.forEach((fn) => fn());
+    return () => {
+      cleanups.forEach((fn) => fn());
+    };
   }, []);
 
   return (
