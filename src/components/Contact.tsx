@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm, ValidationError } from "@formspree/react";
+import ReCAPTCHA from "react-google-recaptcha"; // 👈 libreria captcha
 import mail from "../assets/SocialImg/email.png";
 import github from "../assets/SocialImg/github.png";
 import linkedin from "../assets/SocialImg/linkedIn.png";
 
 const Contact: React.FC = () => {
   const [state, handleSubmit] = useForm("xvgbvoge");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   if (state.succeeded) {
     return (
@@ -16,13 +18,27 @@ const Contact: React.FC = () => {
     );
   }
 
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!captchaToken) {
+      alert("Conferma che non sei un robot.");
+      return;
+    }
+    handleSubmit(e); // 👈 invio solo se captcha valido
+  };
+
   return (
     <section id="contact" className="contact-section">
       <h2>Let's talk</h2>
       <p className="subtitle">
         Mandami un messaggio — ti risponderò il prima possibile.
       </p>
-      <form onSubmit={handleSubmit} className="contact-form">
+
+      <form onSubmit={handleFormSubmit} className="contact-form">
         <input type="text" name="name" placeholder="Il tuo nome" required />
 
         <input type="email" name="email" placeholder="La tua email" required />
@@ -37,6 +53,11 @@ const Contact: React.FC = () => {
           prefix="Message"
           field="message"
           errors={state.errors}
+        />
+
+        <ReCAPTCHA
+          sitekey="6Lc7CsIrAAAAAE-XTyfQnhjn7-Xs-wPD8QFo895n"
+          onChange={handleCaptchaChange}
         />
 
         <button type="submit" disabled={state.submitting}>
