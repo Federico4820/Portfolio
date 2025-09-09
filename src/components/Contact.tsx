@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useForm, ValidationError } from "@formspree/react";
-import ReCAPTCHA from "react-google-recaptcha"; // 👈 libreria captcha
+import ReCAPTCHA from "react-google-recaptcha";
 import mail from "../assets/SocialImg/email.png";
 import github from "../assets/SocialImg/github.png";
 import linkedin from "../assets/SocialImg/linkedIn.png";
@@ -8,8 +8,12 @@ import linkedin from "../assets/SocialImg/linkedIn.png";
 const Contact: React.FC = () => {
   const [state, handleSubmit] = useForm("xvgbvoge");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
+  const captchaRef = useRef<ReCAPTCHA>(null);
 
   if (state.succeeded) {
+    // reset captcha al successo
+    captchaRef.current?.reset();
     return (
       <section id="contact" className="contact-section">
         <h2>Let's talk</h2>
@@ -20,15 +24,16 @@ const Contact: React.FC = () => {
 
   const handleCaptchaChange = (token: string | null) => {
     setCaptchaToken(token);
+    setCaptchaError(null);
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!captchaToken) {
-      alert("Conferma che non sei un robot.");
+      setCaptchaError("Conferma che non sei un robot.");
       return;
     }
-    handleSubmit(e); // 👈 invio solo se captcha valido
+    handleSubmit(e);
   };
 
   return (
@@ -58,7 +63,9 @@ const Contact: React.FC = () => {
         <ReCAPTCHA
           sitekey="6Lc7CsIrAAAAAE-XTyfQnhjn7-Xs-wPD8QFo895n"
           onChange={handleCaptchaChange}
+          ref={captchaRef}
         />
+        {captchaError && <p className="captcha-error">{captchaError}</p>}
 
         <button type="submit" disabled={state.submitting}>
           {state.submitting ? "Invio in corso..." : "Inviami"}
