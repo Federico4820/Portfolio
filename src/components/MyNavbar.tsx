@@ -12,7 +12,7 @@ const MyNavbar: React.FC = () => {
   // Gestione scroll: riduce navbar e chiude menu
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 1);
+      setScrolled(window.scrollY > 0.1);
 
       if (expanded && !ignoreScrollRef.current) {
         setExpanded(false);
